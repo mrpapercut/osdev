@@ -2,11 +2,11 @@
 SYSTEM_HEADER_PROJECTS="libc kernel"
 PROJECTS="libc kernel"
 
-export CROSS_COPMPILER="$(pwd)/cross-compiler" # Location of cross-compiler
+export CROSS_COMPILER="$(pwd)/cross-compiler" # Location of cross-compiler
 export TARGET=i686-elf
 
-if echo $PATH | grep -Eq "$CROSS_COPMPILER/bin:"; then
-    export PATH="$CROSS_COPMPILER/bin:$PATH"
+if ! echo $PATH | grep -Eq "$CROSS_COMPILER/bin:"; then
+    export PATH="$CROSS_COMPILER/bin:$PATH"
 fi
 
 export MAKE=${MAKE:-make}
