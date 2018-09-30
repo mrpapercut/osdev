@@ -10,6 +10,8 @@ BINUTILS_URL=
 
 TEMP_FOLDERS="source files"
 
+REQUIRED_PACKAGES="build-essential bison flex libgmp3-dev libmpc-dev libmprf-dev texinfo"
+
 # Text colors
 TC_ERROR="\033[1;31m"
 TC_SUCCESS="\033[1;32m"
@@ -65,6 +67,26 @@ function makeFolders() {
         fi
     done
     msgSuccess
+}
+
+## REQUIRED PACKAGES
+function installPackages() {
+    MISSING_PACKAGES=""
+
+    for PACKAGE in $REQUIRED_PACKAGES; do
+        msgStatus "Checking if package ${PACKAGE} is installed"
+
+        dpkg-query -l $PACKAGE > /dev/null 2>&1
+
+        if [[ $? == 0 ]]; then
+            msgSuccess "yes"
+        else
+            msgWarn "no"
+            MISSING_PACKAGES="${MISSING_PACKAGES} ${PACKAGE}"
+        fi
+    done
+
+    apt-get install -y $MISSING_PACKAGES
 }
 
 ## GCC
@@ -212,7 +234,8 @@ if [[ $1 == "--clean" ]]; then
 fi
 
 # Run main function
-build
+installPackages
+# build
 
 # TODO:
 # Get GCC source
