@@ -331,8 +331,3 @@ fi
 checkRoot
 installPackages
 build
-
-# TODO:
-# Get GCC source
-# Get binutils source
-# apt-get install build-essential bison flex libgmp3-dev libmpc-dev libmprf-dev texinfo
