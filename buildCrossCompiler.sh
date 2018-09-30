@@ -10,7 +10,7 @@ BINUTILS_URL=
 
 TMP_FOLDERS="src files"
 
-REQUIRED_PACKAGES="build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo"
+REQUIRED_PACKAGES="build-essential bison flex grub-pc-bin libgmp3-dev libmpc-dev libmpfr-dev texinfo xorriso"
 
 # Text colors
 TC_ERROR="\033[1;31m"
