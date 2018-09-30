@@ -1,5 +1,8 @@
 # Files
+*.iso
 
 # Folders
 tmp
+isodir
+sysroot
 cross-compiler
