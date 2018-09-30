@@ -244,6 +244,61 @@ function unpackBinutils() {
     fi
 }
 
+## MAKING BINUTILS
+function makeBinutils() {
+    CWD=$(pwd)
+
+    if [[ ! -d ./tmp/src/build-binutils ]]; then
+        msgStatus "Creating build-binutils folder"
+        mkdir -p ./tmp/src/build-binutils
+        msgSuccess
+    fi
+
+    cd ./tmp/src/build-binutils
+    msgStatus "Building binutils (might take a while)"
+    ../binutils-$BINUTILS_LATEST_VERSION/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
+    make
+    make install
+
+    if [[ $? == 0 ]]; then
+        msgSuccess
+        cd $CWD
+    else
+        msgError
+        cd $CWD
+        exit 1
+    fi
+}
+
+## MAKING GCC
+function makeGCC() {
+    CWD=$(pwd)
+
+    if [[ ! -d ./tmp/src/build-gcc ]]; then
+        msgStatus "Creating build-gcc folder"
+        mkdir -p ./tmp/src/build-gcc
+        msgSuccess
+    fi
+
+    cd ./tmp/src/build-gcc
+    msgStatus "Building GCC (might take a while)"
+    ../gcc-$GCC_LATEST_VERSION/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
+
+    make all-gcc
+    make all-target-libgcc
+    make install-gcc
+    make install-target-libgcc
+
+    if [[ $? == 0 ]]; then
+        msgSuccess
+        cd $CWD
+    else
+        msgError
+        cd $CWD
+        exit 1
+    fi
+}
+
 # Main function
 function build() {
     # Create folders if necessary
@@ -263,6 +318,9 @@ function build() {
     export PREFIX="$(pwd)/cross-compiler"
     export TARGET=i686-elf
     export PATH="$PREFIX/bin:$PATH"
+
+    makeBinutils
+    makeGCC
 }
 
 if [[ $1 == "--clean" ]]; then
