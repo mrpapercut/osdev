@@ -10,7 +10,7 @@ BINUTILS_URL=
 
 TEMP_FOLDERS="source files"
 
-REQUIRED_PACKAGES="build-essential bison flex libgmp3-dev libmpc-dev libmprf-dev texinfo"
+REQUIRED_PACKAGES="build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo"
 
 # Text colors
 TC_ERROR="\033[1;31m"
@@ -42,13 +42,13 @@ function msgWarn() {
     echo -e "${TC_WARN}${MSG}${TC_NC}"
 }
 
-# Cleaning files & folders
+## Cleaning files & folders
 function clean() {
     cleanFolders
     # cleanFiles
 }
 
-# Folders
+## Folder functions
 function cleanFolders() {
     msgStatus "Cleaning temp folders"
     for FOLDER in $TEMP_FOLDERS; do
@@ -69,6 +69,17 @@ function makeFolders() {
     msgSuccess
 }
 
+## Check if root
+function checkRoot() {
+    msgStatus "Checking if root"
+    if [[ $EUID != 0 ]]; then
+        msgError "no"
+        exit 1
+    else
+        msgSuccess "yes"
+    fi
+}
+
 ## REQUIRED PACKAGES
 function installPackages() {
     MISSING_PACKAGES=""
@@ -86,7 +97,11 @@ function installPackages() {
         fi
     done
 
-    apt-get install -y $MISSING_PACKAGES
+    if [[ $MISSING_PACKAGES != "" ]]; then
+        msgStatus "Installing packages${MISSING_PACKAGES}"
+        msgSuccess " "
+        apt-get install -y $MISSING_PACKAGES
+    fi
 }
 
 ## GCC
@@ -234,8 +249,9 @@ if [[ $1 == "--clean" ]]; then
 fi
 
 # Run main function
+checkRoot
 installPackages
-# build
+build
 
 # TODO:
 # Get GCC source
