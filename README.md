@@ -1,6 +1,6 @@
 # OSdev tutorial
 
-This project follows tutorials from https://wiki.osdev.org
+This project follows tutorials from https://wiki.osdev.org and other resources in order to develop a basic OS and gain knowledge about how OS's are built and how they work.
 
 ## TODO
 ### Loading kernel
