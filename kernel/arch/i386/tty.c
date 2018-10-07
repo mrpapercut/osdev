@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <kernel/tty.h>
+#include <kernel/cursor.h>
 
 #include "vga.h"
 
@@ -17,20 +18,60 @@ static uint8_t terminal_color;
 static uint16_t* terminal_buffer;
 
 void terminal_initialize(void) {
+    terminal_buffer = VGA_MEMORY;
+
+    terminal_clear();
+}
+
+void terminal_clear(void) {
     terminal_row = 0;
     terminal_column = 0;
     terminal_color = vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
-    terminal_buffer = VGA_MEMORY;
+
     for (size_t y = 0; y < VGA_HEIGHT; y++) {
         for (size_t x = 0; x < VGA_WIDTH; x++) {
             const size_t index = y * VGA_WIDTH + x;
+
             terminal_buffer[index] = vga_entry(' ', terminal_color);
         }
     }
+
+    // Reset cursor
+    terminal_setcursor(0);
+}
+
+// Scrolls everything up one line
+void terminal_scroll(void) {
+    for (size_t y = 0; y < VGA_HEIGHT; y++) {
+        for (size_t x = 0; x < VGA_WIDTH; x++) {
+            const size_t index = y * VGA_WIDTH + x;
+
+            if (index + 80 <= VGA_WIDTH * VGA_HEIGHT) {
+                terminal_buffer[index] = terminal_buffer[index + 80];
+            } else {
+                terminal_buffer[index] = vga_entry(' ', vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK));
+            }
+        }
+    }
+
+    terminal_row--;
 }
 
 void terminal_setcolor(uint8_t color) {
     terminal_color = vga_entry_color(color, VGA_COLOR_BLACK);
+}
+
+void terminal_setcursor(uint16_t pos) {
+    // Save old color
+    const uint8_t old_color = terminal_color;
+
+    // Reset color
+    terminal_setcolor(VGA_COLOR_WHITE);
+
+    fb_move_cursor(pos);
+
+    // Restore color
+    terminal_setcolor(old_color);
 }
 
 void terminal_putentryat(unsigned char c, uint8_t color, size_t x, size_t y) {
@@ -49,11 +90,16 @@ void terminal_putchar(char c) {
 
         if (++terminal_column == VGA_WIDTH) {
             terminal_column = 0;
-            if (++terminal_row == VGA_HEIGHT) {
-                terminal_row = 0;
-            }
+            terminal_row++;
         }
     }
+
+    if (terminal_row == VGA_HEIGHT) {
+        terminal_scroll();
+    }
+
+    // Set cursor to character after
+    terminal_setcursor(terminal_row * VGA_WIDTH + terminal_column);
 }
 
 void terminal_write(const char* data, size_t size) {
