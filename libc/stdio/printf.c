@@ -57,6 +57,11 @@ int printf(const char* restrict format, ...) {
                 // TODO: Set errno to EOVERFLOW
                 return -1;
             }
+
+            if (!print(&c, sizeof(c))) {
+				return -1;
+            }
+
             written++;
         } else if (*format == 's') {
             format++;
@@ -71,6 +76,8 @@ int printf(const char* restrict format, ...) {
             if (!print(str, len)) {
                 return -1;
             }
+
+            written += len;
         } else {
             format = format_begun_at;
             size_t len = strlen(format);
